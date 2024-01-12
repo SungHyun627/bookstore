@@ -1,4 +1,4 @@
-const mariadb = require('mysql');
+const mariadb = require('mysql2');
 let dotenv = require('dotenv');
 dotenv.config();
 

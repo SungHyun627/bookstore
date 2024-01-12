@@ -1,14 +1,12 @@
 const express = require('express');
 const router = express.Router();
+const { signup } = require('../controllers/userController');
+const { validateSignUp } = require('../middlewares/userMiddleware');
 
 router.use(express.json());
 
 // 회원가입
-router.post('/signup', (req, res) => {
-  res.json({
-    message: '회원가입',
-  });
-});
+router.post('/signup', validateSignUp, signup);
 
 // 로그인
 router.post('/signin', (req, res) => {
