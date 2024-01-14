@@ -57,4 +57,26 @@ const signIn = (req, res) => {
   });
 };
 
-module.exports = { signUp, signIn };
+const passwordRequest = (req, res) => {
+  const { email } = req.body;
+
+  let sql = 'SELECT * FROM users WHERE email = ?';
+
+  connection.query(sql, email, (err, results) => {
+    if (err) {
+      return res.status(StatusCodes.BAD_REQUEST).end();
+    }
+
+    const user = results[0];
+
+    if (user) {
+      return res.status(StatusCodes.OK).json({
+        email: email,
+      });
+    } else {
+      return res.status(StatusCodes.UNAUTHORIZED).end();
+    }
+  });
+};
+
+module.exports = { signUp, signIn, passwordRequest };
