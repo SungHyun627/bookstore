@@ -79,4 +79,26 @@ const passwordResetRequest = (req, res) => {
   });
 };
 
-module.exports = { signUp, signIn, passwordResetRequest };
+const passwordReset = (req, res) => {
+  const { email, password } = req.body;
+
+  const sql = `UPDATE users SET password=?, salt=? WHERE email=?`;
+  const salt = crypto.randomBytes(10).toString('base64');
+  const hashPassword = getHashPassword(password, salt);
+
+  const values = [hashPassword, salt, email];
+
+  connection.query(sql, values, (err, results) => {
+    if (err) {
+      return res.status(StatusCodes.BAD_REQUEST).end();
+    }
+
+    if (results.affectedRows === 0) {
+      return res.status(StatusCodes.BAD_REQUEST).end();
+    } else {
+      return res.status(StatusCodes.OK).json(results);
+    }
+  });
+};
+
+module.exports = { signUp, signIn, passwordResetRequest, passwordReset };
