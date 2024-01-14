@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const { getHashPassword } = require('../utils/password');
 
-const signup = (req, res) => {
+const signUp = (req, res) => {
   const { email, password } = req.body;
   const sql = `INSERT INTO users (email, password, salt) VALUES (?, ?, ?)`;
 
@@ -21,7 +21,7 @@ const signup = (req, res) => {
   });
 };
 
-const signin = (req, res) => {
+const signIn = (req, res) => {
   const { email, password } = req.body;
   const sql = `SELECT * FROM users WHERE email = ?`;
 
@@ -57,4 +57,4 @@ const signin = (req, res) => {
   });
 };
 
-module.exports = { signup, signin };
+module.exports = { signUp, signIn };
