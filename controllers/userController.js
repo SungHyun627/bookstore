@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const { getHashPassword } = require('../utils/password');
 
-const signup = (req, res) => {
+const signUp = (req, res) => {
   const { email, password } = req.body;
   const sql = `INSERT INTO users (email, password, salt) VALUES (?, ?, ?)`;
 
@@ -21,7 +21,7 @@ const signup = (req, res) => {
   });
 };
 
-const signin = (req, res) => {
+const signIn = (req, res) => {
   const { email, password } = req.body;
   const sql = `SELECT * FROM users WHERE email = ?`;
 
@@ -57,4 +57,48 @@ const signin = (req, res) => {
   });
 };
 
-module.exports = { signup, signin };
+const passwordResetRequest = (req, res) => {
+  const { email } = req.body;
+
+  let sql = 'SELECT * FROM users WHERE email = ?';
+
+  connection.query(sql, email, (err, results) => {
+    if (err) {
+      return res.status(StatusCodes.BAD_REQUEST).end();
+    }
+
+    const user = results[0];
+
+    if (user) {
+      return res.status(StatusCodes.OK).json({
+        email: email,
+      });
+    } else {
+      return res.status(StatusCodes.UNAUTHORIZED).end();
+    }
+  });
+};
+
+const passwordReset = (req, res) => {
+  const { email, password } = req.body;
+
+  const sql = `UPDATE users SET password=?, salt=? WHERE email=?`;
+  const salt = crypto.randomBytes(10).toString('base64');
+  const hashPassword = getHashPassword(password, salt);
+
+  const values = [hashPassword, salt, email];
+
+  connection.query(sql, values, (err, results) => {
+    if (err) {
+      return res.status(StatusCodes.BAD_REQUEST).end();
+    }
+
+    if (results.affectedRows === 0) {
+      return res.status(StatusCodes.BAD_REQUEST).end();
+    } else {
+      return res.status(StatusCodes.OK).json(results);
+    }
+  });
+};
+
+module.exports = { signUp, signIn, passwordResetRequest, passwordReset };

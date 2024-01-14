@@ -27,5 +27,12 @@ const validateUserPassword = body('password')
 
 const validateSignUp = [validateUserEmail, validateUserPassword, validateEachValidation];
 const validateSignIn = [validateUserEmail, validateUserPassword, validateEachValidation];
+const validatePasswordResetRequest = [validateUserEmail, validateEachValidation];
+const validatePasswordReset = [validateUserEmail, validateUserPassword, validateEachValidation];
 
-module.exports = { validateSignUp, validateSignIn };
+module.exports = {
+  validateSignUp,
+  validateSignIn,
+  validatePasswordResetRequest,
+  validatePasswordReset,
+};
