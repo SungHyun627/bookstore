@@ -26,5 +26,6 @@ const validateUserPassword = body('password')
   .withMessage('비밀번호는 최소 하나의 영문자, 숫자, 특수 문자를 포함한 8~20자 길이이어야 합니다.');
 
 const validateSignUp = [validateUserEmail, validateUserPassword, validateEachValidation];
+const validateSignIn = [validateUserEmail, validateUserPassword, validateEachValidation];
 
-module.exports = { validateSignUp };
+module.exports = { validateSignUp, validateSignIn };
