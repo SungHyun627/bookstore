@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { signup, signin } = require('../controllers/userController');
-const { validateSignUp } = require('../middlewares/userMiddleware');
+const { validateSignUp, validateSignIn } = require('../middlewares/userMiddleware');
 
 router.use(express.json());
 
@@ -9,7 +9,7 @@ router.use(express.json());
 router.post('/signup', validateSignUp, signup);
 
 // 로그인
-router.post('/signin', signin);
+router.post('/signin', validateSignIn, signin);
 
 router
   .route('/reset')
