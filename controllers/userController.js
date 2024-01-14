@@ -57,7 +57,7 @@ const signIn = (req, res) => {
   });
 };
 
-const passwordRequest = (req, res) => {
+const passwordResetRequest = (req, res) => {
   const { email } = req.body;
 
   let sql = 'SELECT * FROM users WHERE email = ?';
@@ -79,4 +79,4 @@ const passwordRequest = (req, res) => {
   });
 };
 
-module.exports = { signUp, signIn, passwordRequest };
+module.exports = { signUp, signIn, passwordResetRequest };
