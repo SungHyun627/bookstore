@@ -2,21 +2,24 @@ const { StatusCodes } = require('http-status-codes');
 const connection = require('../config/mysqlConfig');
 
 const getAllBooksInfo = (req, res) => {
-  const { category_id, news } = req.query;
+  const { category_id, news, limit, currentPage } = req.query;
 
+  const offset = limit * (currentPage - 1);
   let sql = 'SELECT * FROM books';
   let values = [];
 
   if (category_id && news) {
     sql += ' WHERE category_id=? AND pub_date BETWEEN DATE_SUB(NOW(), INTERVAL 2 MONTH) AND NOW();';
-    values = [category_id, news];
+    values = [category_id];
   } else if (category_id) {
     sql += ' WHERE category_id=?';
-    values = category_id;
+    values = [category_id];
   } else if (news) {
-    sql += `WHERE pub_date BETWEEN DATE_SUB(NOW(), INTERVAL 2 MONTH) AND NOW()`;
-    values = news;
+    sql += ` WHERE pub_date BETWEEN DATE_SUB(NOW(), INTERVAL 2 MONTH) AND NOW()`;
   }
+
+  sql += ' LIMIT ? OFFSET ?';
+  values.push(parseInt(limit, 10), offset);
 
   connection.query(sql, values, (err, results) => {
     if (err) {
