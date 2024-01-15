@@ -2,30 +2,32 @@ const { StatusCodes } = require('http-status-codes');
 const connection = require('../config/mysqlConfig');
 
 const getAllBooksInfo = (req, res) => {
-  const { category_id } = req.query;
+  const { category_id, news } = req.query;
 
-  if (category_id) {
-    const sql = 'SELECT * FROM books WHERE category_id=?';
+  let sql = 'SELECT * FROM books';
+  let values = [];
 
-    connection.query(sql, category_id, (err, results) => {
-      if (err) {
-        return res.status(StatusCodes.BAD_REQUEST).end();
-      }
-
-      if (results.length) {
-        return res.status(StatusCodes.OK).json(results);
-      }
-      return res.status(StatusCodes.NOT_FOUND).end();
-    });
-  } else {
-    const sql = 'SELECT * FROM books';
-    connection.query(sql, (err, results) => {
-      if (err) {
-        return res.status(StatusCodes.BAD_REQUEST).end();
-      }
-      return res.status(StatusCodes.CREATED).json(results);
-    });
+  if (category_id && news) {
+    sql += ' WHERE category_id=? AND pub_date BETWEEN DATE_SUB(NOW(), INTERVAL 2 MONTH) AND NOW();';
+    values = [category_id, news];
+  } else if (category_id) {
+    sql += ' WHERE category_id=?';
+    values = category_id;
+  } else if (news) {
+    sql += `WHERE pub_date BETWEEN DATE_SUB(NOW(), INTERVAL 2 MONTH) AND NOW()`;
+    values = news;
   }
+
+  connection.query(sql, values, (err, results) => {
+    if (err) {
+      return res.status(StatusCodes.BAD_REQUEST).end();
+    }
+
+    if (results.length) {
+      return res.status(StatusCodes.OK).json(results);
+    }
+    return res.status(StatusCodes.NOT_FOUND).end();
+  });
 };
 
 const getBookInfo = (req, res) => {
