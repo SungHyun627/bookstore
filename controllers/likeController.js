@@ -16,4 +16,19 @@ const addLike = (req, res) => {
   });
 };
 
-module.exports = { addLike };
+const removeLike = (req, res) => {
+  const { id } = req.params;
+  const { user_id } = req.body;
+
+  const sql = 'DELETE FROM likes WHERE user_id = ? AND liked_book_id = ?;';
+  const values = [user_id, id];
+
+  connection.query(sql, values, (err, results) => {
+    if (err) {
+      return res.status(StatusCodes.BAD_REQUEST).end();
+    }
+    return res.status(StatusCodes.OK).json(results);
+  });
+};
+
+module.exports = { addLike, removeLike };
