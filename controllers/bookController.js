@@ -42,7 +42,7 @@ const getBookInfo = (req, res) => {
                     (SELECT EXISTS (SELECT * FROM likes WHERE user_id=? AND liked_book_id=?)) AS liked
               FROM books 
               LEFT JOIN category
-              ON books.category_id = category.id
+              ON books.category_id = category.category_id
               WHERE books.id=?;`;
 
   const values = [user_id, book_id, book_id];
