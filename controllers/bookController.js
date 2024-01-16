@@ -5,7 +5,8 @@ const getAllBooksInfo = (req, res) => {
   const { category_id, news, limit, currentPage } = req.query;
 
   const offset = limit * (currentPage - 1);
-  let sql = 'SELECT * FROM books';
+  let sql =
+    'SELECT *, (SELECT count(*) FROM likes WHERE books.id=liked_book_id) AS likes FROM books';
   let values = [];
 
   if (category_id && news) {
