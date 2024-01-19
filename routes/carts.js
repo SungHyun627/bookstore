@@ -1,4 +1,6 @@
 const express = require('express');
+const { addTocart } = require('../controllers/cartController');
+
 const router = express.Router();
 
 router.use(express.json());
@@ -6,11 +8,7 @@ router.use(express.json());
 // 장바구니 담기
 router
   .route('/')
-  .post((req, res) => {
-    res.json({
-      message: '장바구니 담기',
-    });
-  })
+  .post(addTocart)
   // 장바구니 조회
   .get((req, res) => {
     res.json({
