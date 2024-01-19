@@ -30,7 +30,21 @@ const getCartItems = (req, res) => {
   });
 };
 
+const removeCartItem = (req, res) => {
+  const { id } = req.params;
+
+  const sql = 'DELETE FROM cartItems WHERE id=?;';
+
+  connection.query(sql, id, (err, results) => {
+    if (err) {
+      return res.status(StatusCodes.BAD_REQUEST).end();
+    }
+    return res.status(StatusCodes.OK).json(results);
+  });
+};
+
 module.exports = {
   addTocart,
   getCartItems,
+  removeCartItem,
 };
