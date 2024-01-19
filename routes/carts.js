@@ -1,5 +1,5 @@
 const express = require('express');
-const { addTocart } = require('../controllers/cartController');
+const { addTocart, getCartItems } = require('../controllers/cartController');
 
 const router = express.Router();
 
@@ -10,11 +10,7 @@ router
   .route('/')
   .post(addTocart)
   // 장바구니 조회
-  .get((req, res) => {
-    res.json({
-      message: '장바구니 조회',
-    });
-  });
+  .get(getCartItems);
 
 // 장바구니 도서 삭제
 router.delete('/:id', (req, res) => {

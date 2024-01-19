@@ -15,6 +15,22 @@ const addTocart = (req, res) => {
   });
 };
 
+const getCartItems = (req, res) => {
+  const { user_id } = req.body;
+  const sql = `SELECT cartItems.id, book_id, title, summary, quantity, price 
+               FROM cartItems LEFT JOIN books 
+               ON cartItems.book_id = books.id
+               WHERE user_id=?`;
+
+  connection.query(sql, user_id, (err, results) => {
+    if (err) {
+      return res.status(StatusCodes.BAD_REQUEST).end();
+    }
+    return res.status(StatusCodes.OK).json(results);
+  });
+};
+
 module.exports = {
   addTocart,
+  getCartItems,
 };
