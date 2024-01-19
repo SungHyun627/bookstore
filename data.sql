@@ -52,3 +52,7 @@ INSERT INTO cartItems (book_id, quantity, user_id) VALUES (1, 1, 1);
 SELECT cartItems.id, book_id, title, summary, quantity, price 
 FROM cartItems LEFT JOIN books 
 ON cartItems.book_id = books.id;
+
+DELETE FROM cartItems WHERE id = ?
+
+SELECT * FROM cartItems WHERE user_id=1 AND id IN (1,3)
