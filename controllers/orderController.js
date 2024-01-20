@@ -3,7 +3,12 @@ const mariadb = require('mysql2/promise');
 const dotenv = require('dotenv');
 
 dotenv.config();
-// const connection = require('../config/mysqlConfig');
+
+const deleteCartItems = async (connection, items) => {
+  const sql = `DELETE FROM cartItems WHERE id IN (?)`;
+  const result = await connection.query(sql, [items]);
+  return result;
+};
 
 const order = async (req, res) => {
   const connection = await mariadb.createConnection({
@@ -48,12 +53,22 @@ const order = async (req, res) => {
   return res.status(StatusCodes.OK).json(result);
 };
 
-const deleteCartItems = async (connection, items) => {
-  const sql = `DELETE FROM cartItems WHERE id IN (?)`;
-  const result = await connection.query(sql, [items]);
-  return result;
+const getOrders = async (req, res) => {
+  const connection = await mariadb.createConnection({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    database: process.env.DB_DATABASE,
+    password: process.env.DB_PASSWORD,
+    dateStrings: true,
+  });
+
+  const sql = `SELECT orders.id, created_at, address, receiver, contact, book_title, total_quantity, total_price 
+        FROM orders LEFT JOIN delivery ON orders.delivery_id = delivery.id;`;
+  const [rows, fields] = await connection.query(sql);
+  return res.status(StatusCodes.OK).json(rows);
 };
 
 module.exports = {
   order,
+  getOrders,
 };

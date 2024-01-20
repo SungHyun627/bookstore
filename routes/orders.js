@@ -1,5 +1,5 @@
 const express = require('express');
-const { order } = require('../controllers/orderController');
+const { order, getOrders } = require('../controllers/orderController');
 
 const router = express.Router();
 
@@ -10,11 +10,7 @@ router
   .route('/')
   .post(order)
   // 주문 목록 조회
-  .get((req, res) => {
-    res.json({
-      message: '주문 목록 조회',
-    });
-  });
+  .get(getOrders);
 
 // 주문 상세 상품 조회
 router.get('/:id', (req, res) => {
