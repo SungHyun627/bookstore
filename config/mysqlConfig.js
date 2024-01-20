@@ -1,5 +1,6 @@
 const mariadb = require('mysql2');
-let dotenv = require('dotenv');
+const dotenv = require('dotenv');
+
 dotenv.config();
 
 const connnection = mariadb.createConnection({
