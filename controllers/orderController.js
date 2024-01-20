@@ -68,7 +68,26 @@ const getOrders = async (req, res) => {
   return res.status(StatusCodes.OK).json(rows);
 };
 
+const getOrderDetail = async (req, res) => {
+  const { id } = req.params;
+
+  const connection = await mariadb.createConnection({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    database: process.env.DB_DATABASE,
+    password: process.env.DB_PASSWORD,
+    dateStrings: true,
+  });
+  const sql = `SELECT book_id, title, author, price, quantity
+        FROM orderedBook LEFT JOIN books ON orderedBook.book_id = books.id
+        WHERE order_id=?`;
+
+  const [rows, fields] = await connection.query(sql, [id]);
+  return res.status(StatusCodes.OK).json(rows);
+};
+
 module.exports = {
   order,
   getOrders,
+  getOrderDetail,
 };
