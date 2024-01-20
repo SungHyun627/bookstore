@@ -56,3 +56,20 @@ ON cartItems.book_id = books.id;
 DELETE FROM cartItems WHERE id = ?
 
 SELECT * FROM cartItems WHERE user_id=1 AND id IN (1,3)
+
+INSERT INTO delivery (address, receiver, contact) VALUES ("서울시 중구", "김성현", "010-1234-5678");
+
+INSERT INTO orders (book_title, total_quantity, total_price, user_id, delivery_id) 
+VALUES ("어린왕자들", 3, 60000, 1,delivery_id);
+
+const order_id = SELECT max(id) FROM orders;
+
+INSERT INTO orderedBook (order_id, book_id, quantity)
+VALUES (order_id, 1, 1);
+INSERT INTO orderedBook (order_id, book_id, quantity)
+VALUES (order_id, 3, 2);
+
+SELECT max(id) FROM orderedBook;
+SELECT last_insert_id();
+
+DELETE FROM cartItems WHERE id IN (1,2,3);
