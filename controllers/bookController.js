@@ -30,9 +30,12 @@ const getAllBooksInfo = (req, res) => {
     if (err) {
       // return res.status(StatusCodes.BAD_REQUEST).end();
     }
-    console.log(results);
 
     if (results.length) {
+      results.map((result) => {
+        result.pubDate = result.pub_date;
+        delete result.pub_date;
+      });
       allBooksRes.books = results;
     } else {
       return res.status(StatusCodes.NOT_FOUND).end();
