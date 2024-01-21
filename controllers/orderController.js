@@ -30,7 +30,7 @@ const order = async (req, res) => {
   }
   if (authorization instanceof jwt.JsonWebTokenError) {
     return res.status(StatusCodes.UNAUTHORIZED).json({
-      message: '잘못된 토큰인입니다.',
+      message: '잘못된 토큰입니다.',
     });
   }
   const { items, delivery, totalQuantity, totalPrice, firstBookTitle } = req.body;
