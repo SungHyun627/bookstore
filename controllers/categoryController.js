@@ -9,7 +9,15 @@ const getAllCategories = (req, res) => {
       return res.status(StatusCodes.BAD_REQUEST).end();
     }
 
-    return res.status(StatusCodes.OK).json(results);
+    if (results.length) {
+      results.map((result) => {
+        result.id = result.category_id;
+        result.name = result.category_name;
+        delete result.category_id;
+        delete result.category_name;
+      });
+      return res.status(StatusCodes.OK).json(results);
+    }
   });
 };
 

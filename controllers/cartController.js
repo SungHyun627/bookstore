@@ -53,14 +53,21 @@ const getCartItems = (req, res) => {
   const values = [authorization.id];
 
   if (selected) {
-    sql += `AND cartItems.id IN (?)`;
+    sql += ` AND cartItems.id IN (?)`;
     values.push(selected);
   }
   connection.query(sql, values, (err, results) => {
     if (err) {
       return res.status(StatusCodes.BAD_REQUEST).end();
     }
-    return res.status(StatusCodes.OK).json(results);
+    if (results.length) {
+      results.map((result) => {
+        result.bookId = result.book_id;
+        delete result.book_id;
+      });
+      return res.status(StatusCodes.OK).json(results);
+    }
+    return res.status(StatusCodes.NOT_FOUND).end();
   });
 };
 

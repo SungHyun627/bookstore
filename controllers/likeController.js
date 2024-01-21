@@ -26,7 +26,7 @@ const addLike = (req, res) => {
     if (err) {
       return res.status(StatusCodes.BAD_REQUEST).end();
     }
-    return res.status(StatusCodes.OK).json(results);
+    return res.status(StatusCodes.OK).json();
   });
 };
 
@@ -52,7 +52,7 @@ const removeLike = (req, res) => {
     if (err) {
       return res.status(StatusCodes.BAD_REQUEST).end();
     }
-    return res.status(StatusCodes.OK).json(results);
+    return res.status(StatusCodes.OK).json();
   });
 };
 

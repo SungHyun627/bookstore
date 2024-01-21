@@ -90,8 +90,18 @@ const getOrders = async (req, res) => {
   });
 
   const sql = `SELECT orders.id, created_at, address, receiver, contact, book_title, total_quantity, total_price 
-        FROM orders LEFT JOIN delivery ON orders.delivery_id = delivery.id;`;
-  const [rows, fields] = await connection.query(sql);
+        FROM orders LEFT JOIN delivery ON orders.delivery_id = delivery.id WHERE user_id = ?;`;
+  const [rows, fields] = await connection.query(sql, [authorization.id]);
+  rows.map((row) => {
+    row.createdAt = row.created_at;
+    row.bookTitle = row.book_title;
+    row.totalQuantity = row.total_quantity;
+    row.totalPrice = row.total_price;
+    delete row.created_at;
+    delete row.book_title;
+    delete row.total_quantity;
+    delete row.total_price;
+  });
   return res.status(StatusCodes.OK).json(rows);
 };
 
@@ -118,10 +128,15 @@ const getOrderDetail = async (req, res) => {
     dateStrings: true,
   });
   const sql = `SELECT book_id, title, author, price, quantity
-        FROM orderedBook LEFT JOIN books ON orderedBook.book_id = books.id
-        WHERE order_id=?`;
+        FROM orderedBook LEFT JOIN books
+        ON orderedBook.book_id = books.id
+        WHERE order_id= ?`;
 
   const [rows, fields] = await connection.query(sql, [orderId]);
+  rows.map((row) => {
+    row.bookId = row.book_id;
+    delete row.book_id;
+  });
   return res.status(StatusCodes.OK).json(rows);
 };
 

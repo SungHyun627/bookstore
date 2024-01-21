@@ -28,13 +28,14 @@ const getAllBooksInfo = (req, res) => {
 
   connection.query(sql, values, (err, results) => {
     if (err) {
-      // return res.status(StatusCodes.BAD_REQUEST).end();
+      return res.status(StatusCodes.BAD_REQUEST).end();
     }
 
     if (results.length) {
       results.map((result) => {
         result.pubDate = result.pub_date;
         delete result.pub_date;
+        delete result.category_id;
       });
       allBooksRes.books = results;
     } else {
@@ -98,7 +99,14 @@ const getBookInfo = (req, res) => {
     }
 
     if (results[0]) {
-      return res.status(StatusCodes.OK).json(results[0]);
+      const result = results[0];
+      result.categoryName = result.category_name;
+      result.pubDate = result.pub_date;
+      delete result.category_id;
+      delete result.category_name;
+      delete result.pub_date;
+
+      return res.status(StatusCodes.OK).json(result);
     }
     return res.status(StatusCodes.NOT_FOUND).end();
   });
