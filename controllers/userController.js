@@ -17,7 +17,11 @@ const signUp = (req, res) => {
     if (err) {
       return res.status(StatusCodes.BAD_REQUEST).end();
     }
-    return res.status(StatusCodes.CREATED).json(results);
+
+    if (results.affectedRows) {
+      return res.status(StatusCodes.CREATED).json(results);
+    }
+    return res.status(StatusCodes.BAD_REQUEST).end();
   });
 };
 
