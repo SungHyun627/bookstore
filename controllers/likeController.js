@@ -1,10 +1,8 @@
 const jwt = require('jsonwebtoken');
 const { StatusCodes } = require('http-status-codes');
-const dotenv = require('dotenv');
+
 const connection = require('../config/mysqlConfig');
 const ensureAuthorization = require('../utils/auth');
-
-dotenv.config();
 
 const addLike = (req, res) => {
   const book_id = req.params.id;

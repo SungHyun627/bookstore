@@ -1,10 +1,8 @@
 const jwt = require('jsonwebtoken');
-const dotenv = require('dotenv');
+
 const { StatusCodes } = require('http-status-codes');
 const connection = require('../config/mysqlConfig');
 const ensureAuthorization = require('../utils/auth');
-
-dotenv.config();
 
 const addTocart = (req, res) => {
   const { book_id, quantity } = req.body;
