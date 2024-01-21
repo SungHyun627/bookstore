@@ -1,6 +1,8 @@
 const { StatusCodes } = require('http-status-codes');
 const mariadb = require('mysql2/promise');
 const dotenv = require('dotenv');
+const jwt = require('jsonwebtoken');
+const ensureAuthorization = require('../utils/auth');
 
 dotenv.config();
 
@@ -18,7 +20,20 @@ const order = async (req, res) => {
     password: process.env.DB_PASSWORD,
     dateStrings: true,
   });
-  const { items, delivery, totalQuantity, totalPrice, userId, firstBookTitle } = req.body;
+
+  const authorization = ensureAuthorization(req, res);
+
+  if (authorization instanceof jwt.TokenExpiredError) {
+    return res.status(StatusCodes.UNAUTHORIZED).json({
+      message: '로그인 세션이 만료되었습니다. 다시 로그인 하세요.',
+    });
+  }
+  if (authorization instanceof jwt.JsonWebTokenError) {
+    return res.status(StatusCodes.UNAUTHORIZED).json({
+      message: '잘못된 토큰인입니다.',
+    });
+  }
+  const { items, delivery, totalQuantity, totalPrice, firstBookTitle } = req.body;
 
   // delivery 테이블 삽입
   let sql = 'INSERT INTO delivery (address, receiver, contact) VALUES (?, ?, ?);';
@@ -31,7 +46,7 @@ const order = async (req, res) => {
   // orders 테이블 삽입
   sql = `INSERT INTO orders (book_title , total_quantity, total_price, user_id, delivery_id)
           VALUES (?, ?, ?, ?, ?);`;
-  values = [firstBookTitle, totalQuantity, totalPrice, userId, delivery_id];
+  values = [firstBookTitle, totalQuantity, totalPrice, authorization.id, delivery_id];
   [results] = await connection.execute(sql, values);
   const order_id = results.insertId;
 
@@ -69,7 +84,7 @@ const getOrders = async (req, res) => {
 };
 
 const getOrderDetail = async (req, res) => {
-  const { id } = req.params;
+  const orderId = req.params.id;
 
   const connection = await mariadb.createConnection({
     host: process.env.DB_HOST,
@@ -82,7 +97,7 @@ const getOrderDetail = async (req, res) => {
         FROM orderedBook LEFT JOIN books ON orderedBook.book_id = books.id
         WHERE order_id=?`;
 
-  const [rows, fields] = await connection.query(sql, [id]);
+  const [rows, fields] = await connection.query(sql, [orderId]);
   return res.status(StatusCodes.OK).json(rows);
 };
 
