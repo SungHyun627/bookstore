@@ -1,5 +1,7 @@
 const { StatusCodes } = require('http-status-codes');
+const jwt = require('jsonwebtoken');
 const connection = require('../config/mysqlConfig');
+const ensureAuthorization = require('../utils/auth');
 
 const getAllBooksInfo = (req, res) => {
   const { category_id, news, limit, currentPage } = req.query;
@@ -35,20 +37,41 @@ const getAllBooksInfo = (req, res) => {
 };
 
 const getBookInfo = (req, res) => {
-  const { user_id } = req.body;
+  const authorization = ensureAuthorization(req, res);
+
+  if (authorization instanceof jwt.TokenExpiredError) {
+    return res.status(StatusCodes.UNAUTHORIZED).json({
+      message: '로그인 세션이 만료되었습니다. 다시 로그인 하세요.',
+    });
+  }
+  if (authorization instanceof jwt.JsonWebTokenError) {
+    return res.status(StatusCodes.UNAUTHORIZED).json({
+      message: '잘못된 토큰입니다.',
+    });
+  }
+
   const book_id = req.params.id;
-  const sql = `SELECT *,
-                    (SELECT count(*) FROM likes WHERE books.id=liked_book_id) AS likes,
-                    (SELECT EXISTS (SELECT * FROM likes WHERE user_id=? AND liked_book_id=?)) AS liked
+  const sql =
+    authorization instanceof ReferenceError
+      ? `SELECT *,
+                    (SELECT count(*) FROM likes WHERE books.id=liked_book_id) AS likes
               FROM books 
               LEFT JOIN category
               ON books.category_id = category.category_id
-              WHERE books.id=?;`;
+              WHERE books.id=?;`
+      : `SELECT *,
+              (SELECT count(*) FROM likes WHERE books.id=liked_book_id) AS likes,
+              (SELECT EXISTS (SELECT * FROM likes WHERE user_id=? AND liked_book_id=?)) AS liked
+        FROM books 
+        LEFT JOIN category
+        ON books.category_id = category.category_id
+        WHERE books.id=?;`;
 
-  const values = [user_id, book_id, book_id];
+  const values =
+    authorization instanceof ReferenceError ? [book_id] : [authorization.id, book_id, book_id];
+
   connection.query(sql, values, (err, results) => {
     if (err) {
-      console.log(err);
       return res.status(StatusCodes.BAD_REQUEST).end();
     }
 
