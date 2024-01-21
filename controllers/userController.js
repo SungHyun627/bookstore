@@ -1,7 +1,7 @@
-const connection = require('../config/mysqlConfig');
 const { StatusCodes } = require('http-status-codes');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
+const connection = require('../config/mysqlConfig');
 const { getHashPassword } = require('../utils/password');
 
 const signUp = (req, res) => {
@@ -37,6 +37,7 @@ const signIn = (req, res) => {
     if (signInUser && signInUser.password === hashPassword) {
       const token = jwt.sign(
         {
+          id: signInUser.id,
           email: signInUser.email,
         },
         process.env.PRIVATE_KEY,
@@ -51,16 +52,15 @@ const signIn = (req, res) => {
       });
 
       return res.status(StatusCodes.OK).json(results);
-    } else {
-      return res.status(StatusCodes.UNAUTHORIZED).end();
     }
+    return res.status(StatusCodes.UNAUTHORIZED).end();
   });
 };
 
 const passwordResetRequest = (req, res) => {
   const { email } = req.body;
 
-  let sql = 'SELECT * FROM users WHERE email = ?';
+  const sql = 'SELECT * FROM users WHERE email = ?';
 
   connection.query(sql, email, (err, results) => {
     if (err) {
@@ -71,11 +71,10 @@ const passwordResetRequest = (req, res) => {
 
     if (user) {
       return res.status(StatusCodes.OK).json({
-        email: email,
+        email,
       });
-    } else {
-      return res.status(StatusCodes.UNAUTHORIZED).end();
     }
+    return res.status(StatusCodes.UNAUTHORIZED).end();
   });
 };
 
@@ -95,9 +94,8 @@ const passwordReset = (req, res) => {
 
     if (results.affectedRows === 0) {
       return res.status(StatusCodes.BAD_REQUEST).end();
-    } else {
-      return res.status(StatusCodes.OK).json(results);
     }
+    return res.status(StatusCodes.OK).json(results);
   });
 };
 
