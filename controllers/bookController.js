@@ -4,11 +4,13 @@ const connection = require('../config/mysqlConfig');
 const ensureAuthorization = require('../utils/auth');
 
 const getAllBooksInfo = (req, res) => {
+  const allBooksRes = {};
   const { category_id, news, limit, currentPage } = req.query;
 
   const offset = limit * (currentPage - 1);
+
   let sql =
-    'SELECT *, (SELECT count(*) FROM likes WHERE books.id=liked_book_id) AS likes FROM books';
+    'SELECT SQL_CALC_FOUND_ROWS *, (SELECT count(*) FROM likes WHERE books.id=liked_book_id) AS likes FROM books';
   let values = [];
 
   if (category_id && news) {
@@ -26,13 +28,30 @@ const getAllBooksInfo = (req, res) => {
 
   connection.query(sql, values, (err, results) => {
     if (err) {
+      // return res.status(StatusCodes.BAD_REQUEST).end();
+    }
+    console.log(results);
+
+    if (results.length) {
+      allBooksRes.books = results;
+    } else {
+      return res.status(StatusCodes.NOT_FOUND).end();
+    }
+  });
+
+  sql = 'SELECT found_rows()';
+
+  connection.query(sql, (err, results) => {
+    if (err) {
       return res.status(StatusCodes.BAD_REQUEST).end();
     }
 
-    if (results.length) {
-      return res.status(StatusCodes.OK).json(results);
-    }
-    return res.status(StatusCodes.NOT_FOUND).end();
+    const pagination = {};
+    pagination.currentPage = parseInt(currentPage, 10);
+    pagination.totalCount = results[0]['found_rows()'];
+
+    allBooksRes.pagination = pagination;
+    return res.status(StatusCodes.OK).json(allBooksRes);
   });
 };
 
