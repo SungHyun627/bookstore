@@ -2,6 +2,9 @@ const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 const { StatusCodes } = require('http-status-codes');
 const connection = require('../config/mysqlConfig');
+const ensureAuthorization = require('../utils/auth');
+
+dotenv.config();
 
 const addTocart = (req, res) => {
   const { book_id, quantity } = req.body;
@@ -69,17 +72,6 @@ const removeCartItem = (req, res) => {
     }
     return res.status(StatusCodes.OK).json(results);
   });
-};
-
-const ensureAuthorization = (req, res) => {
-  try {
-    const receivedJwt = req.headers.authorization;
-    const decodedJwt = jwt.verify(receivedJwt, process.env.PRIVATE_KEY);
-    return decodedJwt;
-  } catch (err) {
-    console.log(err);
-    return err;
-  }
 };
 
 module.exports = {
