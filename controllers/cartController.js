@@ -8,6 +8,17 @@ const addTocart = (req, res) => {
 
   const authorization = ensureAuthorization(req, res);
 
+  if (authorization instanceof jwt.TokenExpiredError) {
+    return res.status(StatusCodes.UNAUTHORIZED).json({
+      message: '로그인 세션이 만료되었습니다. 다시 로그인 하세요.',
+    });
+  }
+  if (authorization instanceof jwt.JsonWebTokenError) {
+    return res.status(StatusCodes.UNAUTHORIZED).json({
+      message: '잘못된 토큰인입니다.',
+    });
+  }
+
   const sql = 'INSERT INTO cartItems (book_id, quantity, user_id) VALUES (?, ?, ?);';
   const values = [book_id, quantity, authorization.id];
 
@@ -23,6 +34,16 @@ const getCartItems = (req, res) => {
   const { selected } = req.body;
   const authorization = ensureAuthorization(req, res);
 
+  if (authorization instanceof jwt.TokenExpiredError) {
+    return res.status(StatusCodes.UNAUTHORIZED).json({
+      message: '로그인 세션이 만료되었습니다. 다시 로그인 하세요.',
+    });
+  }
+  if (authorization instanceof jwt.JsonWebTokenError) {
+    return res.status(StatusCodes.UNAUTHORIZED).json({
+      message: '잘못된 토큰인입니다.',
+    });
+  }
   const sql = `SELECT cartItems.id, book_id, title, summary, quantity, price 
                FROM cartItems LEFT JOIN books 
                ON cartItems.book_id = books.id
@@ -56,9 +77,8 @@ const ensureAuthorization = (req, res) => {
     const decodedJwt = jwt.verify(receivedJwt, process.env.PRIVATE_KEY);
     return decodedJwt;
   } catch (err) {
-    return res.status(StatusCodes.UNAUTHORIZED).json({
-      message: '로그인 세션이 만료되었습니다. 다시 로그인 하세요.',
-    });
+    console.log(err);
+    return err;
   }
 };
 
