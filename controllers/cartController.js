@@ -47,12 +47,17 @@ const getCartItems = (req, res) => {
       message: '잘못된 토큰인입니다.',
     });
   }
-  const sql = `SELECT cartItems.id, book_id, title, summary, quantity, price 
+  let sql = `SELECT cartItems.id, book_id, title, summary, quantity, price 
                FROM cartItems LEFT JOIN books 
                ON cartItems.book_id = books.id
-               WHERE user_id=? AND cartItems.id IN (?)`;
+               WHERE user_id=?`;
 
-  const values = [authorization.id, selected];
+  const values = [authorization.id];
+
+  if (selected) {
+    sql += `AND cartItems.id IN (?)`;
+    values.push(selected);
+  }
   connection.query(sql, values, (err, results) => {
     if (err) {
       return res.status(StatusCodes.BAD_REQUEST).end();
