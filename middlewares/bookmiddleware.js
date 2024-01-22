@@ -1,6 +1,5 @@
 const { validationResult, param, query } = require('express-validator');
 const { StatusCodes } = require('http-status-codes');
-const { passwordRegex } = require('../constants/regex');
 
 const validateEachValidation = (req, res, next) => {
   const err = validationResult(req);
