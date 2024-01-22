@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const { StatusCodes } = require('http-status-codes');
 const connection = require('../config/mysqlConfig');
 const ensureAuthorization = require('../utils/auth');
+const { cartQueries } = require('../utils/queries');
 
 const addTocart = (req, res) => {
   const { book_id, quantity } = req.body;
@@ -20,7 +21,7 @@ const addTocart = (req, res) => {
     });
   }
 
-  const sql = 'INSERT INTO cartItems (book_id, quantity, user_id) VALUES (?, ?, ?);';
+  const sql = cartQueries.insertCartItems;
   const values = [book_id, quantity, authorization.id];
 
   connection.query(sql, values, (err, results) => {
@@ -42,18 +43,15 @@ const getCartItems = (req, res) => {
   }
   if (authorization instanceof jwt.JsonWebTokenError) {
     return res.status(StatusCodes.UNAUTHORIZED).json({
-      message: '잘못된 토큰인입니다.',
+      message: '잘못된 토큰입니다.',
     });
   }
-  let sql = `SELECT cartItems.id, book_id, title, summary, quantity, price 
-               FROM cartItems LEFT JOIN books 
-               ON cartItems.book_id = books.id
-               WHERE user_id=?`;
+  let sql = cartQueries.selectCartItems;
 
   const values = [authorization.id];
 
   if (selected) {
-    sql += ` AND cartItems.id IN (?)`;
+    sql += cartQueries.selectSelectedCartItems;
     values.push(selected);
   }
   connection.query(sql, values, (err, results) => {
@@ -86,7 +84,7 @@ const removeCartItem = (req, res) => {
   }
   const cartItemId = req.params.id;
 
-  const sql = 'DELETE FROM cartItems WHERE id=?;';
+  const sql = cartQueries.deleteCartItems;
 
   connection.query(sql, cartItemId, (err, results) => {
     if (err) {

@@ -1,8 +1,9 @@
 const { StatusCodes } = require('http-status-codes');
 const connection = require('../config/mysqlConfig');
+const { categoryQueries } = require('../utils/queries');
 
 const getAllCategories = (req, res) => {
-  const sql = 'SELECT * FROM category';
+  const sql = categoryQueries.selectCategories;
 
   connection.query(sql, (err, results) => {
     if (err) {

@@ -3,10 +3,11 @@ const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const connection = require('../config/mysqlConfig');
 const { getHashPassword } = require('../utils/password');
+const { userQueries } = require('../utils/queries');
 
 const signUp = (req, res) => {
   const { email, password } = req.body;
-  const sql = `INSERT INTO users (email, password, salt) VALUES (?, ?, ?)`;
+  const sql = userQueries.insertUserInfo;
 
   const salt = crypto.randomBytes(10).toString('base64');
 
@@ -27,7 +28,7 @@ const signUp = (req, res) => {
 
 const signIn = (req, res) => {
   const { email, password } = req.body;
-  const sql = `SELECT * FROM users WHERE email = ?`;
+  const sql = userQueries.selectUser;
 
   connection.query(sql, email, (err, results) => {
     if (err) {
@@ -64,7 +65,7 @@ const signIn = (req, res) => {
 const passwordResetRequest = (req, res) => {
   const { email } = req.body;
 
-  const sql = 'SELECT * FROM users WHERE email = ?';
+  const sql = userQueries.selectUser;
 
   connection.query(sql, email, (err, results) => {
     if (err) {
@@ -85,7 +86,7 @@ const passwordResetRequest = (req, res) => {
 const passwordReset = (req, res) => {
   const { email, password } = req.body;
 
-  const sql = `UPDATE users SET password=?, salt=? WHERE email=?`;
+  const sql = userQueries.updatePassword;
   const salt = crypto.randomBytes(10).toString('base64');
   const hashPassword = getHashPassword(password, salt);
 

@@ -2,6 +2,7 @@ const { StatusCodes } = require('http-status-codes');
 const jwt = require('jsonwebtoken');
 const connection = require('../config/mysqlConfig');
 const ensureAuthorization = require('../utils/auth');
+const { bookQueries } = require('../utils/queries');
 
 const getAllBooksInfo = (req, res) => {
   const allBooksRes = {};
@@ -9,21 +10,20 @@ const getAllBooksInfo = (req, res) => {
 
   const offset = limit * (currentPage - 1);
 
-  let sql =
-    'SELECT SQL_CALC_FOUND_ROWS *, (SELECT count(*) FROM likes WHERE books.id=liked_book_id) AS likes FROM books';
+  let sql = bookQueries.selectAllBookInfo;
   let values = [];
 
   if (category_id && news) {
-    sql += ' WHERE category_id=? AND pub_date BETWEEN DATE_SUB(NOW(), INTERVAL 2 MONTH) AND NOW();';
+    sql += bookQueries.setCategoryIdAndNewsConditions;
     values = [category_id];
   } else if (category_id) {
-    sql += ' WHERE category_id=?';
+    sql += bookQueries.setCategoryIdCondition;
     values = [category_id];
   } else if (news) {
-    sql += ` WHERE pub_date BETWEEN DATE_SUB(NOW(), INTERVAL 2 MONTH) AND NOW()`;
+    sql += bookQueries.setNewsCondition;
   }
 
-  sql += ' LIMIT ? OFFSET ?';
+  sql += bookQueries.setLimitAndPageConditions;
   values.push(parseInt(limit, 10), offset);
 
   connection.query(sql, values, (err, results) => {
@@ -43,7 +43,7 @@ const getAllBooksInfo = (req, res) => {
     }
   });
 
-  sql = 'SELECT found_rows()';
+  sql = bookQueries.selectFoundRows;
 
   connection.query(sql, (err, results) => {
     if (err) {
@@ -76,19 +76,8 @@ const getBookInfo = (req, res) => {
   const book_id = req.params.id;
   const sql =
     authorization instanceof ReferenceError
-      ? `SELECT *,
-                    (SELECT count(*) FROM likes WHERE books.id=liked_book_id) AS likes
-              FROM books 
-              LEFT JOIN category
-              ON books.category_id = category.category_id
-              WHERE books.id=?;`
-      : `SELECT *,
-              (SELECT count(*) FROM likes WHERE books.id=liked_book_id) AS likes,
-              (SELECT EXISTS (SELECT * FROM likes WHERE user_id=? AND liked_book_id=?)) AS liked
-        FROM books 
-        LEFT JOIN category
-        ON books.category_id = category.category_id
-        WHERE books.id=?;`;
+      ? bookQueries.selectBookDetaiInlNotAuthorization
+      : bookQueries.selectBookDetailInAuthorization;
 
   const values =
     authorization instanceof ReferenceError ? [book_id] : [authorization.id, book_id, book_id];

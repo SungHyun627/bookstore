@@ -3,6 +3,7 @@ const { StatusCodes } = require('http-status-codes');
 
 const connection = require('../config/mysqlConfig');
 const ensureAuthorization = require('../utils/auth');
+const { likeQueries } = require('../utils/queries');
 
 const addLike = (req, res) => {
   const book_id = req.params.id;
@@ -19,7 +20,7 @@ const addLike = (req, res) => {
     });
   }
 
-  const sql = 'INSERT INTO likes (user_id, liked_book_id) VALUES (?, ?);';
+  const sql = likeQueries.addLike;
   const values = [authorization.id, book_id];
 
   connection.query(sql, values, (err, results) => {
@@ -45,7 +46,7 @@ const removeLike = (req, res) => {
     });
   }
 
-  const sql = 'DELETE FROM likes WHERE user_id = ? AND liked_book_id = ?;';
+  const sql = likeQueries.deleteLike;
   const values = [authorization.id, book_id];
 
   connection.query(sql, values, (err, results) => {

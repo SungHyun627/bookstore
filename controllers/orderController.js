@@ -3,11 +3,12 @@ const mariadb = require('mysql2/promise');
 const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
 const ensureAuthorization = require('../utils/auth');
+const { orderQueries } = require('../utils/queries');
 
 dotenv.config();
 
 const deleteCartItems = async (connection, items) => {
-  const sql = `DELETE FROM cartItems WHERE id IN (?)`;
+  const sql = orderQueries.deleteSelectedCartItems;
   const result = await connection.query(sql, [items]);
   return result;
 };
@@ -36,7 +37,7 @@ const order = async (req, res) => {
   const { items, delivery, totalQuantity, totalPrice, firstBookTitle } = req.body;
 
   // delivery 테이블 삽입
-  let sql = 'INSERT INTO delivery (address, receiver, contact) VALUES (?, ?, ?);';
+  let sql = orderQueries.insertDeliveryInfo;
   let values = [delivery.address, delivery.receiver, delivery.contact];
 
   let [results] = await connection.execute(sql, values);
@@ -44,19 +45,18 @@ const order = async (req, res) => {
   const delivery_id = results.insertId;
 
   // orders 테이블 삽입
-  sql = `INSERT INTO orders (book_title , total_quantity, total_price, user_id, delivery_id)
-          VALUES (?, ?, ?, ?, ?);`;
+  sql = orderQueries.insertOrdersInfo;
   values = [firstBookTitle, totalQuantity, totalPrice, authorization.id, delivery_id];
   [results] = await connection.execute(sql, values);
   const order_id = results.insertId;
 
   // items를 가지고, 장바구니에서 book_id, quantity를 조회
-  sql = 'SELECT book_id, quantity FROM cartItems WHERE id IN (?);';
+  sql = orderQueries.selectBookIdAndQuatity;
   const [orderItems, fields] = await connection.query(sql, [items]);
 
   // orderedBook 테이블 삽입
 
-  sql = `INSERT INTO orderedBook (order_id, book_id, quantity) VALUES ?;`;
+  sql = orderQueries.insertOrderedBookInfo;
   values = [];
   orderItems.forEach((item) => {
     values.push([order_id, item.book_id, item.quantity]);
@@ -89,8 +89,7 @@ const getOrders = async (req, res) => {
     dateStrings: true,
   });
 
-  const sql = `SELECT orders.id, created_at, address, receiver, contact, book_title, total_quantity, total_price 
-        FROM orders LEFT JOIN delivery ON orders.delivery_id = delivery.id WHERE user_id = ?;`;
+  const sql = orderQueries.selectOrders;
   const [rows, fields] = await connection.query(sql, [authorization.id]);
   rows.map((row) => {
     row.createdAt = row.created_at;
@@ -127,10 +126,7 @@ const getOrderDetail = async (req, res) => {
     password: process.env.DB_PASSWORD,
     dateStrings: true,
   });
-  const sql = `SELECT book_id, title, author, price, quantity
-        FROM orderedBook LEFT JOIN books
-        ON orderedBook.book_id = books.id
-        WHERE order_id= ?`;
+  const sql = orderQueries.selectOrderDetail;
 
   const [rows, fields] = await connection.query(sql, [orderId]);
   rows.map((row) => {
