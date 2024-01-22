@@ -1,15 +1,14 @@
 const { body, validationResult } = require('express-validator');
-const { passwordRegex } = require('../constants/regex');
 const { StatusCodes } = require('http-status-codes');
+const { passwordRegex } = require('../constants/regex');
 
 const validateEachValidation = (req, res, next) => {
   const err = validationResult(req);
 
   if (err.isEmpty()) {
     return next();
-  } else {
-    return res.status(StatusCodes.BAD_REQUEST).json(err.array());
   }
+  return res.status(StatusCodes.BAD_REQUEST).json(err.array());
 };
 const validateUserEmail = body('email')
   .trim()

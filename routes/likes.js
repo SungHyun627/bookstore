@@ -2,7 +2,7 @@ const express = require('express');
 
 const router = express.Router();
 const { addLike, removeLike } = require('../controllers/likeController');
-const { validateLike } = require('../middlewares/likemiddleware');
+const { validateLike } = require('../middlewares/likeMiddleware');
 
 router.use(express.json());
 

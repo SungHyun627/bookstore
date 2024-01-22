@@ -2,7 +2,7 @@ const express = require('express');
 
 const router = express.Router();
 const { getAllBooksInfo, getBookInfo } = require('../controllers/bookController');
-const { validatesGetAllBooks, validateBook } = require('../middlewares/bookmiddleware');
+const { validatesGetAllBooks, validateBook } = require('../middlewares/bookMiddleware');
 
 router.use(express.json());
 
